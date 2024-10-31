@@ -2979,18 +2979,40 @@ SDL_PrivateGameControllerButton(SDL_GameController *gamecontroller, SDL_GameCont
     }
 #endif /* !SDL_EVENTS_DISABLED */
 	
-	if (event.type == SDL_CONTROLLERBUTTONDOWN) {
-    	if (event.cbutton.button == SDL_CONTROLLER_BUTTON_GUIDE) {
-        // Crear un evento de teclado simulado para la tecla ESCAPE
-        SDL_Event escapeEvent;
-        escapeEvent.type = SDL_KEYDOWN;
-        escapeEvent.key.keysym.sym = SDLK_ESCAPE;
-        escapeEvent.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
-        escapeEvent.key.state = SDL_PRESSED;
-        escapeEvent.key.repeat = 0;
-        SDL_PushEvent(&escapeEvent);
-    	}
-	}
+    if (event.type == SDL_CONTROLLERBUTTONDOWN) {
+        if (event.cbutton.button == SDL_CONTROLLER_BUTTON_GUIDE) {
+            // Crear un evento de teclado simulado para la tecla ESCAPE
+            SDL_Event escapeEvent;
+            escapeEvent.type = SDL_KEYDOWN;
+            escapeEvent.key.keysym.sym = SDLK_ESCAPE;
+            escapeEvent.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
+            escapeEvent.key.state = SDL_PRESSED;
+            escapeEvent.key.repeat = 0;
+            SDL_PushEvent(&escapeEvent);
+        }
+		
+        if (event.cbutton.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
+            // Crear un evento de teclado simulado para la tecla REPAG
+            SDL_Event escapeEvent;
+            escapeEvent.type = SDL_KEYDOWN;
+            escapeEvent.key.keysym.sym = SDLK_PAGEUP;
+            escapeEvent.key.keysym.scancode = SDL_SCANCODE_PAGEUP;
+            escapeEvent.key.state = SDL_PRESSED;
+            escapeEvent.key.repeat = 0;
+            SDL_PushEvent(&escapeEvent);
+        }
+       
+        if (event.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
+            // Crear un evento de teclado simulado para la tecla AVPAG
+            SDL_Event escapeEvent;
+            escapeEvent.type = SDL_KEYDOWN;
+            escapeEvent.key.keysym.sym = SDLK_PAGEDOWN;
+            escapeEvent.key.keysym.scancode = SDL_SCANCODE_PAGEDOWN;
+            escapeEvent.key.state = SDL_PRESSED;
+            escapeEvent.key.repeat = 0;
+            SDL_PushEvent(&escapeEvent);
+        }
+    }
 	
     return (posted);
 }
