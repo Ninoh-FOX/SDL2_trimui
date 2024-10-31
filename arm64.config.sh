@@ -3,16 +3,14 @@
 # export CC=arm-linux-gnueabihf-gcc
 # export CXX=arm-linux-gnueabihf-g++
 # export CFLAGS="-marm -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -O3"
-export CC=aarch64-linux-gnu-gcc
-export CXX=aarch64-linux-gnu-g++
-export CFLAGS="-marm -mcpu=cortex-a53 -O3"
-
+export CC=/home/ninoh-fox/Descargas/trimui/aarch64-linux-gnu-7.5.0-linaro/bin/aarch64-linux-gnu-gcc
+export CXX=/home/ninoh-fox/Descargas/trimui/aarch64-linux-gnu-7.5.0-linaro/bin/aarch64-linux-gnu-g++
+export CFLAGS="-I/home/ninoh-fox/Descargas/trimui/usr/include -std=gnu99"
+export LDFLAGS="-L/home/ninoh-fox/Descargas/trimui/usr/lib -lEGL -lGLESv2 -lIMGegl -lglslcompiler -lsrv_um -lusc -ldl"
 make distclean
 
-./configure --prefix=`pwd`/../libs/ \
+./configure --prefix=/home/ninoh-fox/Descargas/trimui/usr \
   --host=arm-linux-gnueabihf \
-		CFLAGS=$CFLAGS "-I`pwd`/../../sdk/usr/include -std=gnu99" \
-		LDFLAGS="-L`pwd`/../../sdk/usr/lib -lEGL -lGLESv2 -lIMGegl -lglslcompiler -lsrv_um -lusc -ldl"\
     --disable-pulseaudio --enable-shared --enable-static \
     --enable-assembly \
     --enable-arm-simd \
@@ -37,8 +35,9 @@ make distclean
     --disable-video-dummy --disable-arts --disable-esd \
     --disable-video-x11  \
     --disable-hidapi \
-    --disable-sensor \
+    --enable-sensor \
     --disable-power \
+	--disable-jack
 
 
 #    --enable-video-opengl \
@@ -46,3 +45,4 @@ make distclean
 #   --enable-video-mali \		
 #   --enable-video-fbcon \
 #   --enable-video-opengles2 \
+make -j5
