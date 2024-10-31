@@ -1,0 +1,310 @@
+`configure' configures this package to adapt to many kinds of systems.
+
+Usage: ./configure [OPTION]... [VAR=VALUE]...
+
+To assign environment variables (e.g., CC, CFLAGS...), specify them as
+VAR=VALUE.  See below for descriptions of some of the useful variables.
+
+Defaults for the options are specified in brackets.
+
+Configuration:
+  -h, --help              display this help and exit
+      --help=short        display options specific to this package
+      --help=recursive    display the short help of all the included packages
+  -V, --version           display version information and exit
+  -q, --quiet, --silent   do not print `checking ...' messages
+      --cache-file=FILE   cache test results in FILE [disabled]
+  -C, --config-cache      alias for `--cache-file=config.cache'
+  -n, --no-create         do not create output files
+      --srcdir=DIR        find the sources in DIR [configure dir or `..']
+
+Installation directories:
+  --prefix=PREFIX         install architecture-independent files in PREFIX
+                          [/usr/local]
+  --exec-prefix=EPREFIX   install architecture-dependent files in EPREFIX
+                          [PREFIX]
+
+By default, `make install' will install all the files in
+`/usr/local/bin', `/usr/local/lib' etc.  You can specify
+an installation prefix other than `/usr/local' using `--prefix',
+for instance `--prefix=$HOME'.
+
+For better control, use the options below.
+
+Fine tuning of the installation directories:
+  --bindir=DIR            user executables [EPREFIX/bin]
+  --sbindir=DIR           system admin executables [EPREFIX/sbin]
+  --libexecdir=DIR        program executables [EPREFIX/libexec]
+  --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
+  --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
+  --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
+  --libdir=DIR            object code libraries [EPREFIX/lib]
+  --includedir=DIR        C header files [PREFIX/include]
+  --oldincludedir=DIR     C header files for non-gcc [/usr/include]
+  --datarootdir=DIR       read-only arch.-independent data root [PREFIX/share]
+  --datadir=DIR           read-only architecture-independent data [DATAROOTDIR]
+  --infodir=DIR           info documentation [DATAROOTDIR/info]
+  --localedir=DIR         locale-dependent data [DATAROOTDIR/locale]
+  --mandir=DIR            man documentation [DATAROOTDIR/man]
+  --docdir=DIR            documentation root [DATAROOTDIR/doc/PACKAGE]
+  --htmldir=DIR           html documentation [DOCDIR]
+  --dvidir=DIR            dvi documentation [DOCDIR]
+  --pdfdir=DIR            pdf documentation [DOCDIR]
+  --psdir=DIR             ps documentation [DOCDIR]
+
+X features:
+  --x-includes=DIR    X include files are in DIR
+  --x-libraries=DIR   X library files are in DIR
+
+System types:
+  --build=BUILD     configure for building on BUILD [guessed]
+  --host=HOST       cross-compile to build programs to run on HOST [BUILD]
+
+Optional Features:
+  --disable-option-checking  ignore unrecognized --enable/--with options
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-shared[=PKGS]  build shared libraries [default=yes]
+  --enable-static[=PKGS]  build static libraries [default=yes]
+  --enable-fast-install[=PKGS]
+                          optimize for fast installation [default=yes]
+  --disable-libtool-lock  avoid locking (might break parallel builds)
+  --disable-largefile     omit support for large files
+  --enable-assertions     Enable internal sanity checks
+                          (auto/disabled/release/enabled/paranoid)
+                          [default=auto]
+  --enable-dependency-tracking
+                          Use gcc -MMD -MT dependency tracking [default=yes]
+  --enable-libc           Use the system C library [default=yes]
+  --enable-system-iconv   Use iconv() from system-installed libraries
+                          [default=yes]
+  --enable-gcc-atomics    Use gcc builtin atomics [default=yes]
+  --enable-atomic         Enable the atomic operations subsystem [default=yes]
+  --enable-audio          Enable the audio subsystem [default=yes]
+  --enable-video          Enable the video subsystem [default=yes]
+  --enable-render         Enable the render subsystem [default=yes]
+  --enable-events         Enable the events subsystem [default=yes]
+  --enable-joystick       Enable the joystick subsystem [default=yes]
+  --enable-haptic         Enable the haptic (force feedback) subsystem
+                          [default=yes]
+  --enable-hidapi         Enable the HIDAPI subsystem [default=yes]
+  --enable-sensor         Enable the sensor subsystem [default=yes]
+  --enable-power          Enable the power subsystem [default=yes]
+  --enable-filesystem     Enable the filesystem subsystem [default=yes]
+  --enable-timers         Enable the timer subsystem [default=yes]
+  --enable-file           Enable the file subsystem [default=yes]
+  --enable-misc           Enable the misc subsystem [default=yes]
+  --enable-locale         Enable the locale subsystem [default=yes]
+  --enable-loadso         Enable the shared object loading subsystem
+                          [default=yes]
+  --enable-cpuinfo        Enable the cpuinfo subsystem [default=yes]
+  --enable-assembly       Enable assembly routines [default=yes]
+  --enable-ssemath        Allow GCC to use SSE floating point math
+                          [default=maybe]
+  --enable-mmx            use MMX assembly routines [default=yes]
+  --enable-3dnow          use 3DNow! assembly routines [default=yes]
+  --enable-sse            use SSE assembly routines [default=yes]
+  --enable-sse2           use SSE2 assembly routines [default=maybe]
+  --enable-sse3           use SSE3 assembly routines [default=maybe]
+  --enable-altivec        use Altivec assembly routines [default=yes]
+  --enable-lsx            use LSX assembly routines [default=yes]
+  --enable-lasx           use LASX assembly routines [default=yes]
+  --enable-oss            support the OSS audio API [default=maybe]
+  --enable-alsa           support the ALSA audio API [default=yes]
+  --disable-alsatest      Do not try to compile and run a test Alsa program
+  --enable-alsa-shared    dynamically load ALSA audio support [default=yes]
+  --enable-jack           use JACK audio [default=yes]
+  --enable-jack-shared    dynamically load JACK audio support [default=yes]
+  --enable-esd            support the Enlightened Sound Daemon [default=yes]
+  --disable-esdtest       Do not try to compile and run a test ESD program
+  --enable-esd-shared     dynamically load ESD audio support [default=yes]
+  --enable-pipewire       use Pipewire audio [default=yes]
+  --enable-pipewire-shared
+                          dynamically load Pipewire support [default=yes]
+  --enable-pulseaudio     use PulseAudio [default=yes]
+  --enable-pulseaudio-shared
+                          dynamically load PulseAudio support [default=yes]
+  --enable-arts           support the Analog Real Time Synthesizer
+                          [default=yes]
+  --enable-arts-shared    dynamically load aRts audio support [default=yes]
+  --enable-nas            support the NAS audio API [default=yes]
+  --enable-nas-shared     dynamically load NAS audio support [default=yes]
+  --enable-sndio          support the sndio audio API [default=yes]
+  --enable-sndio-shared   dynamically load sndio audio support [default=yes]
+  --enable-fusionsound    use FusionSound audio driver [default=no]
+  --enable-fusionsound-shared
+                          dynamically load fusionsound audio support
+                          [default=yes]
+  --enable-diskaudio      support the disk writer audio driver [default=yes]
+  --enable-dummyaudio     support the dummy audio driver [default=yes]
+  --enable-libsamplerate  use libsamplerate for audio rate conversion
+                          [default=yes]
+  --enable-libsamplerate-shared
+                          dynamically load libsamplerate [default=yes]
+  --enable-arm-simd       use SIMD assembly blitters on ARM [default=no]
+  --enable-arm-neon       use NEON assembly blitters on ARM [default=no]
+  --enable-werror         treat warnings as errors [default=no]
+  --enable-video-wayland  use Wayland video driver [default=yes]
+  --enable-video-wayland-qt-touch
+                          QtWayland server support for Wayland video driver
+                          [default=yes]
+  --enable-wayland-shared dynamically load Wayland support [default=maybe]
+  --enable-libdecor       use libdecor for Wayland client-side decorations
+                          [default=yes]
+  --enable-libdecor-shared
+                          dynamically load libdecor [default=yes]
+  --enable-video-rpi      use Raspberry Pi 2/3 video driver [default=yes]
+  --enable-video-x11      use X11 video driver [default=maybe]
+  --enable-x11-shared     dynamically load X11 support [default=maybe]
+  --enable-video-x11-xcursor
+                          enable X11 Xcursor support [default=yes]
+  --enable-video-x11-xdbe enable X11 Xdbe support [default=yes]
+  --enable-video-x11-xinput
+                          enable X11 XInput extension for manymouse, tablets,
+                          etc [default=yes]
+  --enable-video-x11-xfixes
+                          enable X11 Xfixes support [default=yes]
+  --enable-video-x11-xrandr
+                          enable X11 Xrandr extension for fullscreen
+                          [default=yes]
+  --enable-video-x11-scrnsaver
+                          enable X11 screensaver extension [default=yes]
+  --enable-video-x11-xshape
+                          enable X11 XShape support [default=yes]
+  --enable-video-vivante  use Vivante EGL video driver [default=yes]
+  --enable-video-mali     use Mali EGL video driver [[default=yes]]
+  --enable-video-cocoa    use Cocoa video driver [default=yes]
+  --enable-video-metal    include Metal support [default=yes]
+  --enable-render-metal   enable the Metal render driver [default=yes]
+  --enable-video-directfb use DirectFB video driver [default=no]
+  --enable-directfb-shared
+                          dynamically load directfb support [default=yes]
+  --enable-video-kmsdrm   use KMSDRM video driver [default=yes]
+  --enable-kmsdrm-shared  dynamically load kmsdrm support [default=yes]
+  --enable-video-dummy    use dummy video driver [default=yes]
+  --enable-video-offscreen
+                          use offscreen video driver [default=yes]
+  --enable-video-opengl   include OpenGL support [default=yes]
+  --enable-video-opengles include OpenGL ES support [default=yes]
+  --enable-video-opengles1
+                          include OpenGL ES 1.1 support [default=yes]
+  --enable-video-opengles2
+                          include OpenGL ES 2.0 support [default=yes]
+  --enable-video-vulkan   include Vulkan support [default=yes]
+  --enable-libudev        enable libudev support [default=yes]
+  --enable-dbus           enable D-Bus support [default=yes]
+  --enable-ime            enable IME support [default=yes]
+  --enable-ibus           enable IBus support [default=yes]
+  --enable-fcitx          enable fcitx support [default=yes]
+  --enable-joystick-mfi   include macOS MFI joystick support [default=yes]
+  --enable-pthreads       use POSIX threads for multi-threading
+                          [default=maybe]
+  --enable-pthread-sem    use pthread semaphores [default=maybe]
+  --enable-directx        use DirectX for Windows audio/video [default=yes]
+  --enable-xinput         use Xinput for Windows [default=yes]
+  --enable-wasapi         use the Windows WASAPI audio driver [default=yes]
+  --enable-hidapi-joystick
+                          use HIDAPI for low level joystick drivers
+                          [default=yes]
+  --enable-hidapi-libusb  use libusb for low level joystick drivers
+                          [default=maybe]
+  --enable-clock_gettime  use clock_gettime() instead of gettimeofday() on
+                          UNIX [default=yes]
+  --enable-rpath          use an rpath when linking SDL [default=yes]
+  --enable-backgrounding-signal
+                          number to use for magic backgrounding signal or 'no'
+                          [default=no]
+  --enable-foregrounding-signal
+                          number to use for magic foregrounding signal or 'no'
+                          [default=no]
+  --enable-joystick-virtual
+                          enable virtual joystick APIs [default=yes]
+  --enable-render-d3d     enable the Direct3D render driver [default=yes]
+  --enable-sdl2-config    Install sdl2-config [default=yes]
+  --enable-vendor-info=STRING
+                          Add vendor info to SDL_REVISION
+
+Optional Packages:
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-pic[=PKGS]       try to use only PIC/non-PIC objects [default=use
+                          both]
+  --with-aix-soname=aix|svr4|both
+                          shared library versioning (aka "SONAME") variant to
+                          provide on AIX, [default=aix].
+  --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
+  --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
+                          compiler's sysroot if not specified).
+  --with-alsa-prefix=PFX  Prefix where Alsa library is installed(optional)
+  --with-alsa-inc-prefix=PFX  Prefix where include libraries are (optional)
+  --with-esd-prefix=PFX   Prefix where ESD is installed (optional)
+  --with-esd-exec-prefix=PFX Exec prefix where ESD is installed (optional)
+  --with-x                use the X Window System
+
+Some influential environment variables:
+  CC          C compiler command
+  CFLAGS      C compiler flags
+  LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
+              nonstandard directory <lib dir>
+  LIBS        libraries to pass to the linker, e.g. -l<library>
+  CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
+              you have headers in a nonstandard directory <include dir>
+  LT_SYS_LIBRARY_PATH
+              User-defined run-time library search path.
+  CXX         C++ compiler command
+  CXXFLAGS    C++ compiler flags
+  CXXCPP      C++ preprocessor
+  PKG_CONFIG  path to pkg-config utility
+  PKG_CONFIG_PATH
+              directories to add to pkg-config's search path
+  PKG_CONFIG_LIBDIR
+              path overriding pkg-config's built-in search path
+  CPP         C preprocessor
+  JACK_CFLAGS C compiler flags for JACK, overriding pkg-config
+  JACK_LIBS   linker flags for JACK, overriding pkg-config
+  ESD_CFLAGS  C compiler flags for ESD, overriding pkg-config
+  ESD_LIBS    linker flags for ESD, overriding pkg-config
+  PIPEWIRE_CFLAGS
+              C compiler flags for PIPEWIRE, overriding pkg-config
+  PIPEWIRE_LIBS
+              linker flags for PIPEWIRE, overriding pkg-config
+  PULSEAUDIO_CFLAGS
+              C compiler flags for PULSEAUDIO, overriding pkg-config
+  PULSEAUDIO_LIBS
+              linker flags for PULSEAUDIO, overriding pkg-config
+  SNDIO_CFLAGS
+              C compiler flags for SNDIO, overriding pkg-config
+  SNDIO_LIBS  linker flags for SNDIO, overriding pkg-config
+  FUSIONSOUND_CFLAGS
+              C compiler flags for FUSIONSOUND, overriding pkg-config
+  FUSIONSOUND_LIBS
+              linker flags for FUSIONSOUND, overriding pkg-config
+  DECOR_CFLAGS
+              C compiler flags for DECOR, overriding pkg-config
+  DECOR_LIBS  linker flags for DECOR, overriding pkg-config
+  RPI_CFLAGS  C compiler flags for RPI, overriding pkg-config
+  RPI_LIBS    linker flags for RPI, overriding pkg-config
+  XMKMF       Path to xmkmf, Makefile generator for X Window System
+  DIRECTFB_CFLAGS
+              C compiler flags for DIRECTFB, overriding pkg-config
+  DIRECTFB_LIBS
+              linker flags for DIRECTFB, overriding pkg-config
+  LIBDRM_CFLAGS
+              C compiler flags for LIBDRM, overriding pkg-config
+  LIBDRM_LIBS linker flags for LIBDRM, overriding pkg-config
+  LIBGBM_CFLAGS
+              C compiler flags for LIBGBM, overriding pkg-config
+  LIBGBM_LIBS linker flags for LIBGBM, overriding pkg-config
+  DBUS_CFLAGS C compiler flags for DBUS, overriding pkg-config
+  DBUS_LIBS   linker flags for DBUS, overriding pkg-config
+  IBUS_CFLAGS C compiler flags for IBUS, overriding pkg-config
+  IBUS_LIBS   linker flags for IBUS, overriding pkg-config
+  LIBUSB_CFLAGS
+              C compiler flags for LIBUSB, overriding pkg-config
+  LIBUSB_LIBS linker flags for LIBUSB, overriding pkg-config
+
+Use these variables to override the choices made by `configure' or to help
+it to find libraries and programs with nonstandard names/locations.
+
+Report bugs to the package provider.
