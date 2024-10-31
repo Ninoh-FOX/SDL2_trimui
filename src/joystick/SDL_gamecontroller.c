@@ -2993,24 +2993,24 @@ SDL_PrivateGameControllerButton(SDL_GameController *gamecontroller, SDL_GameCont
 		
         if (event.cbutton.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
             // Crear un evento de teclado simulado para la tecla REPAG
-            SDL_Event escapeEvent;
-            escapeEvent.type = SDL_KEYDOWN;
-            escapeEvent.key.keysym.sym = SDLK_PAGEUP;
-            escapeEvent.key.keysym.scancode = SDL_SCANCODE_PAGEUP;
-            escapeEvent.key.state = SDL_PRESSED;
-            escapeEvent.key.repeat = 0;
-            SDL_PushEvent(&escapeEvent);
+            SDL_Event pageupEvent;
+            pageupEvent.type = SDL_KEYDOWN;
+            pageupEvent.key.keysym.sym = SDLK_PAGEUP;
+            pageupEvent.key.keysym.scancode = SDL_SCANCODE_PAGEUP;
+            pageupEvent.key.state = SDL_PRESSED;
+            pageupEvent.key.repeat = 0;
+            SDL_PushEvent(&pageupEvent);
         }
        
         if (event.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
             // Crear un evento de teclado simulado para la tecla AVPAG
-            SDL_Event escapeEvent;
-            escapeEvent.type = SDL_KEYDOWN;
-            escapeEvent.key.keysym.sym = SDLK_PAGEDOWN;
-            escapeEvent.key.keysym.scancode = SDL_SCANCODE_PAGEDOWN;
-            escapeEvent.key.state = SDL_PRESSED;
-            escapeEvent.key.repeat = 0;
-            SDL_PushEvent(&escapeEvent);
+            SDL_Event pagedownEvent;
+            pagedownEvent.type = SDL_KEYDOWN;
+            pagedownEvent.key.keysym.sym = SDLK_PAGEDOWN;
+            pagedownEvent.key.keysym.scancode = SDL_SCANCODE_PAGEDOWN;
+            pagedownEvent.key.state = SDL_PRESSED;
+            pagedownEvent.key.repeat = 0;
+            SDL_PushEvent(&pagedownEvent);
         }
     }
 	
