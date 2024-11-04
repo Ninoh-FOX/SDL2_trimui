@@ -3014,14 +3014,14 @@ SDL_PrivateGameControllerButton(SDL_GameController *gamecontroller, SDL_GameCont
         }
     }
 	
-	if (event.type == SDL_CONTROLLERBUTTONUP) {
+    if (event.type == SDL_CONTROLLERBUTTONUP) {
         if (event.cbutton.button == SDL_CONTROLLER_BUTTON_GUIDE) {
             // Crear un evento de teclado simulado para la tecla ESCAPE
             SDL_Event escapeEvent;
             escapeEvent.type = SDL_KEYUP;
             escapeEvent.key.keysym.sym = SDLK_ESCAPE;
             escapeEvent.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
-            escapeEvent.key.state = SDL_PRESSED;
+            escapeEvent.key.state = SDL_RELEASED;
             escapeEvent.key.repeat = 0;
             SDL_PushEvent(&escapeEvent);
         }
@@ -3032,7 +3032,7 @@ SDL_PrivateGameControllerButton(SDL_GameController *gamecontroller, SDL_GameCont
             pageupEvent.type = SDL_KEYUP;
             pageupEvent.key.keysym.sym = SDLK_PAGEUP;
             pageupEvent.key.keysym.scancode = SDL_SCANCODE_PAGEUP;
-            pageupEvent.key.state = SDL_PRESSED;
+            pageupEvent.key.state = SDL_RELEASED;
             pageupEvent.key.repeat = 0;
             SDL_PushEvent(&pageupEvent);
         }
@@ -3043,7 +3043,7 @@ SDL_PrivateGameControllerButton(SDL_GameController *gamecontroller, SDL_GameCont
             pagedownEvent.type = SDL_KEYUP;
             pagedownEvent.key.keysym.sym = SDLK_PAGEDOWN;
             pagedownEvent.key.keysym.scancode = SDL_SCANCODE_PAGEDOWN;
-            pagedownEvent.key.state = SDL_PRESSED;
+            pagedownEvent.key.state = SDL_RELEASED;
             pagedownEvent.key.repeat = 0;
             SDL_PushEvent(&pagedownEvent);
         }
