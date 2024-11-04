@@ -3012,9 +3012,7 @@ SDL_PrivateGameControllerButton(SDL_GameController *gamecontroller, SDL_GameCont
             pagedownEvent.key.repeat = 0;
             SDL_PushEvent(&pagedownEvent);
         }
-    }
-	
-    if (event.type == SDL_CONTROLLERBUTTONUP) {
+    } else if (event.type == SDL_CONTROLLERBUTTONUP) {
         if (event.cbutton.button == SDL_CONTROLLER_BUTTON_GUIDE) {
             // Crear un evento de teclado simulado para la tecla ESCAPE
             SDL_Event escapeEvent;
