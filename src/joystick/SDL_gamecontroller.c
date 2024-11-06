@@ -40,6 +40,18 @@
 #include "SDL_system.h"
 #endif
 
+#include <SDL.h>
+#include <stdbool.h>
+
+/* Constants for mouse mode */
+#define MOUSE_SPEED 10
+
+/* Global variable to track mouse mode */
+static bool mouseMode = false;
+static int mouse_x = 512;  // Coordenada X en la pantalla de 1024x768
+static int mouse_y = 384;  // Coordenada Y en la pantalla de 1024x768
+static int dx;
+static int dy;
 
 /* Many controllers turn the center button into an instantaneous button press */
 #define SDL_MINIMUM_GUIDE_BUTTON_DELAY_MS   250
@@ -152,6 +164,23 @@ typedef struct
 
 static SDL_vidpid_list SDL_allowed_controllers;
 static SDL_vidpid_list SDL_ignored_controllers;
+
+/* Function to move the mouse cursor */
+static void
+moveMouseCursor(int dx, int dy)
+{
+    /* Actualizar posición del ratón */
+    mouse_x = SDL_clamp(mouse_x + dx, 0, 1024);
+    mouse_y = SDL_clamp(mouse_y + dy, 0, 768);
+
+    if (mouse_x < 0) mouse_x = SDL_clamp(0, 0, 1024);
+    if (mouse_x > 1023) mouse_x = SDL_clamp(1023, 0, 1024);
+    if (mouse_y < 0) mouse_y = SDL_clamp(0, 0, 768);
+    if (mouse_y > 767) mouse_y = SDL_clamp(767, 0, 768);
+
+    /* Reportar la nueva posición del ratón (modo framebuffer) */
+    SDL_SendMouseMotion(NULL, 0, 0, mouse_x, mouse_y);
+}
 
 static void
 SDL_LoadVIDPIDListFromHint(const char *hint, SDL_vidpid_list *list)
@@ -2907,6 +2936,19 @@ SDL_PrivateGameControllerAxis(SDL_GameController *gamecontroller, SDL_GameContro
 
     /* translate the event, if desired */
     posted = 0;
+	
+    if (mouseMode) {
+        Sint16 threshold = 8000;  // Ajusta el umbral para evitar pequeños movimientos no deseados
+
+        if (axis == SDL_CONTROLLER_AXIS_LEFTX) {
+            dx = (abs(value) > threshold) ? (value / 32768.0) * MOUSE_SPEED : 0;
+        } else if (axis == SDL_CONTROLLER_AXIS_LEFTY) {
+            dy = (abs(value) > threshold) ? (value / 32768.0) * MOUSE_SPEED : 0;
+        }
+		
+        moveMouseCursor(dx, dy);  // Actualiza la posición del ratón en función de dx y dy
+    }
+
 #if !SDL_EVENTS_DISABLED
     if (SDL_GetEventState(SDL_CONTROLLERAXISMOTION) == SDL_ENABLE) {
         SDL_Event event;
@@ -2987,31 +3029,52 @@ SDL_PrivateGameControllerButton(SDL_GameController *gamecontroller, SDL_GameCont
             escapeEvent.key.keysym.sym = SDLK_ESCAPE;
             escapeEvent.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
             escapeEvent.key.state = SDL_PRESSED;
-            escapeEvent.key.repeat = 0;
             SDL_PushEvent(&escapeEvent);
+            posted = SDL_PushEvent(&event) == 1;
         }
 		
         if (event.cbutton.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
             // Crear un evento de teclado simulado para la tecla REPAG
-            SDL_Event pageupEvent;
-            pageupEvent.type = SDL_KEYDOWN;
-            pageupEvent.key.keysym.sym = SDLK_PAGEUP;
-            pageupEvent.key.keysym.scancode = SDL_SCANCODE_PAGEUP;
-            pageupEvent.key.state = SDL_PRESSED;
-            pageupEvent.key.repeat = 0;
-            SDL_PushEvent(&pageupEvent);
+            if (mouseMode) {
+                SDL_Event mouseLEvent;
+                mouseLEvent.type = SDL_MOUSEBUTTONDOWN;
+                SDL_SendMouseButton(NULL, 0, SDL_PRESSED, SDL_BUTTON_LEFT);
+                SDL_PushEvent(&mouseLEvent);
+                posted = SDL_PushEvent(&event) == 1;
+            } else {
+                SDL_Event pageupEvent;
+                pageupEvent.type = SDL_KEYDOWN;
+                pageupEvent.key.keysym.sym = SDLK_PAGEUP;
+                pageupEvent.key.keysym.scancode = SDL_SCANCODE_PAGEUP;
+                pageupEvent.key.state = SDL_PRESSED;
+                SDL_PushEvent(&pageupEvent);
+                posted = SDL_PushEvent(&event) == 1;
+            }
         }
        
         if (event.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
             // Crear un evento de teclado simulado para la tecla AVPAG
-            SDL_Event pagedownEvent;
-            pagedownEvent.type = SDL_KEYDOWN;
-            pagedownEvent.key.keysym.sym = SDLK_PAGEDOWN;
-            pagedownEvent.key.keysym.scancode = SDL_SCANCODE_PAGEDOWN;
-            pagedownEvent.key.state = SDL_PRESSED;
-            pagedownEvent.key.repeat = 0;
-            SDL_PushEvent(&pagedownEvent);
+            if (mouseMode) {
+                SDL_Event mouseREvent;
+                mouseREvent.type = SDL_MOUSEBUTTONDOWN;
+                SDL_SendMouseButton(NULL, 0, SDL_PRESSED, SDL_BUTTON_RIGHT);
+                SDL_PushEvent(&mouseREvent);
+				posted = SDL_PushEvent(&event) == 1;
+            } else {
+                SDL_Event pagedownEvent;
+                pagedownEvent.type = SDL_KEYDOWN;
+                pagedownEvent.key.keysym.sym = SDLK_PAGEDOWN;
+                pagedownEvent.key.keysym.scancode = SDL_SCANCODE_PAGEDOWN;
+                pagedownEvent.key.state = SDL_PRESSED;
+                SDL_PushEvent(&pagedownEvent);
+				posted = SDL_PushEvent(&event) == 1;
+            }
         }
+		
+        if (event.cbutton.button == SDL_CONTROLLER_BUTTON_BACK) {
+        mouseMode = !mouseMode;
+    	}
+	    
     } else if (event.type == SDL_CONTROLLERBUTTONUP) {
         if (event.cbutton.button == SDL_CONTROLLER_BUTTON_GUIDE) {
             // Crear un evento de teclado simulado para la tecla ESCAPE
@@ -3020,31 +3083,121 @@ SDL_PrivateGameControllerButton(SDL_GameController *gamecontroller, SDL_GameCont
             escapeEvent.key.keysym.sym = SDLK_ESCAPE;
             escapeEvent.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
             escapeEvent.key.state = SDL_RELEASED;
-            escapeEvent.key.repeat = 0;
             SDL_PushEvent(&escapeEvent);
+            posted = SDL_PushEvent(&event) == 0;
         }
 		
         if (event.cbutton.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
             // Crear un evento de teclado simulado para la tecla REPAG
-            SDL_Event pageupEvent;
-            pageupEvent.type = SDL_KEYUP;
-            pageupEvent.key.keysym.sym = SDLK_PAGEUP;
-            pageupEvent.key.keysym.scancode = SDL_SCANCODE_PAGEUP;
-            pageupEvent.key.state = SDL_RELEASED;
-            pageupEvent.key.repeat = 0;
-            SDL_PushEvent(&pageupEvent);
+            if (mouseMode) {
+                SDL_Event mouseLEvent;
+                mouseLEvent.type = SDL_MOUSEBUTTONUP;
+                SDL_SendMouseButton(NULL, 0, SDL_RELEASED, SDL_BUTTON_LEFT);
+                SDL_PushEvent(&mouseLEvent);
+                posted = SDL_PushEvent(&event) == 0;
+            } else {
+                SDL_Event pageupEvent;
+                pageupEvent.type = SDL_KEYUP;
+                pageupEvent.key.keysym.sym = SDLK_PAGEUP;
+                pageupEvent.key.keysym.scancode = SDL_SCANCODE_PAGEUP;
+                pageupEvent.key.state = SDL_RELEASED;
+                SDL_PushEvent(&pageupEvent);
+                posted = SDL_PushEvent(&event) == 0;
+             }
         }
        
         if (event.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
             // Crear un evento de teclado simulado para la tecla AVPAG
-            SDL_Event pagedownEvent;
-            pagedownEvent.type = SDL_KEYUP;
-            pagedownEvent.key.keysym.sym = SDLK_PAGEDOWN;
-            pagedownEvent.key.keysym.scancode = SDL_SCANCODE_PAGEDOWN;
-            pagedownEvent.key.state = SDL_RELEASED;
-            pagedownEvent.key.repeat = 0;
-            SDL_PushEvent(&pagedownEvent);
+            if (mouseMode) {
+                // Evento de liberación para el botón derecho del ratón
+                SDL_Event mouseREvent;
+                mouseREvent.type = SDL_MOUSEBUTTONUP;
+                SDL_SendMouseButton(NULL, 0, SDL_RELEASED, SDL_BUTTON_RIGHT);
+                SDL_PushEvent(&mouseREvent);
+                posted = SDL_PushEvent(&event) == 0;
+            } else {
+                SDL_Event pagedownEvent;
+                pagedownEvent.type = SDL_KEYUP;
+                pagedownEvent.key.keysym.sym = SDLK_PAGEDOWN;
+                pagedownEvent.key.keysym.scancode = SDL_SCANCODE_PAGEDOWN;
+                pagedownEvent.key.state = SDL_RELEASED;
+                SDL_PushEvent(&pagedownEvent);
+                posted = SDL_PushEvent(&event) == 0;
+             }
         }
+    }
+	
+    /* Handle D-Pad as mouse movement in mouse mode */
+    if (mouseMode) {
+        if (event.type == SDL_CONTROLLERBUTTONDOWN) {
+            if (event.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP) {
+                SDL_Event mouseUPEvent;
+                mouseUPEvent.type = SDL_MOUSEMOTION;
+                event.motion.y = dy = -MOUSE_SPEED;
+                event.motion.x = dx = 0;
+                moveMouseCursor(dx, dy);
+                SDL_PushEvent(&mouseUPEvent);
+                posted = SDL_PushEvent(&event) == 1;
+             } else if (event.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN) {
+                SDL_Event mouseDOWNEvent;
+                mouseDOWNEvent.type = SDL_MOUSEMOTION;
+                event.motion.y = dy = MOUSE_SPEED;
+                event.motion.x = dx = 0;
+                moveMouseCursor(dx, dy);
+                SDL_PushEvent(&mouseDOWNEvent);
+                posted = SDL_PushEvent(&event) == 1;
+             } else if (event.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT) {
+                SDL_Event mouseLEFTEvent;
+                mouseLEFTEvent.type = SDL_MOUSEMOTION;
+                event.motion.x = dx = -MOUSE_SPEED;
+                event.motion.y = dy = 0;
+                moveMouseCursor(dx, dy);
+                SDL_PushEvent(&mouseLEFTEvent);
+                posted = SDL_PushEvent(&event) == 1;
+             } else if (event.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) {
+                SDL_Event mouseRIGHTEvent;
+                mouseRIGHTEvent.type = SDL_MOUSEMOTION;
+                event.motion.x = dx = MOUSE_SPEED;
+                event.motion.y = dy = 0;
+                moveMouseCursor(dx, dy);
+                SDL_PushEvent(&mouseRIGHTEvent);
+                posted = SDL_PushEvent(&event) == 1;
+              }
+        } else if (event.type == SDL_CONTROLLERBUTTONUP) {
+            if (event.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP) {
+                SDL_Event mouseUPEvent;
+                mouseUPEvent.type = SDL_MOUSEMOTION;
+                event.motion.y = dy = 0;
+                event.motion.x = dx = 0;
+                moveMouseCursor(dx, dy);
+                SDL_PushEvent(&mouseUPEvent);
+                posted = SDL_PushEvent(&event) == 0;
+             } else if (event.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN) {
+                SDL_Event mouseDOWNEvent;
+                mouseDOWNEvent.type = SDL_MOUSEMOTION;
+                event.motion.y = dy = 0;
+                event.motion.x = dx = 0;
+                moveMouseCursor(dx, dy);
+                SDL_PushEvent(&mouseDOWNEvent);
+                posted = SDL_PushEvent(&event) == 0;
+             } else if (event.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT) {
+                SDL_Event mouseLEFTEvent;
+                mouseLEFTEvent.type = SDL_MOUSEMOTION;
+                event.motion.y = dy = 0;
+                event.motion.x = dx = 0;
+                moveMouseCursor(dx, dy);
+                SDL_PushEvent(&mouseLEFTEvent);
+                posted = SDL_PushEvent(&event) == 0;
+             } else if (event.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) {
+                SDL_Event mouseRIGHTEvent;
+                mouseRIGHTEvent.type = SDL_MOUSEMOTION;
+                event.motion.y = dy = 0;
+                event.motion.x = dx = 0;
+                moveMouseCursor(dx, dy);
+                SDL_PushEvent(&mouseRIGHTEvent);
+                posted = SDL_PushEvent(&event) == 0;
+              }
+         }
     }
 	
     return (posted);
