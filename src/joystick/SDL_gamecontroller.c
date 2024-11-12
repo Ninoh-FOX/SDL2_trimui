@@ -53,6 +53,13 @@ static int mouse_y = 384;  // Coordenada Y en la pantalla de 1024x768
 static int dx;
 static int dy;
 
+/* Timers and active states */
+static SDL_TimerID dpad_repeat_timer = 0;
+static SDL_TimerID axis_repeat_timer = 0;
+static Uint32 repeat_interval = 50;  // Interval in ms for repeat
+static bool dpad_up = false, dpad_down = false, dpad_left = false, dpad_right = false;
+static bool axis_left = false, axis_right = false, axis_up = false, axis_down = false;
+
 /* Many controllers turn the center button into an instantaneous button press */
 #define SDL_MINIMUM_GUIDE_BUTTON_DELAY_MS   250
 
@@ -182,6 +189,71 @@ moveMouseCursor(int dx, int dy)
     SDL_SendMouseMotion(NULL, 0, 0, mouse_x, mouse_y);
 }
 
+/* Repeat function for D-Pad */
+static Uint32
+DPadRepeatCallback(Uint32 interval, void *param)
+{
+    int dx = 0, dy = 0;
+
+    if (dpad_left) dx -= MOUSE_SPEED;
+    if (dpad_right) dx += MOUSE_SPEED;
+    if (dpad_up) dy -= MOUSE_SPEED;
+    if (dpad_down) dy += MOUSE_SPEED;
+
+    moveMouseCursor(dx, dy);
+    return interval;
+}
+
+static void
+StartDPadRepeat()
+{
+    if (dpad_repeat_timer == 0) {
+        dpad_repeat_timer = SDL_AddTimer(repeat_interval, DPadRepeatCallback, NULL);
+    }
+}
+
+static void
+StopDPadRepeat()
+{
+    if (dpad_repeat_timer != 0) {
+        SDL_RemoveTimer(dpad_repeat_timer);
+        dpad_repeat_timer = 0;
+    }
+}
+
+/* Repeat function for axis with diagonal support */
+static Uint32
+AxisRepeatCallback(Uint32 interval, void *param)
+{
+    int dx = 0, dy = 0;
+
+    if (axis_left) dx -= MOUSE_SPEED;
+    if (axis_right) dx += MOUSE_SPEED;
+    if (axis_up) dy -= MOUSE_SPEED;
+    if (axis_down) dy += MOUSE_SPEED;
+
+    moveMouseCursor(dx, dy);
+    return interval;
+}
+
+static void
+StartAxisRepeat()
+{
+    if (axis_repeat_timer == 0) {
+        axis_repeat_timer = SDL_AddTimer(repeat_interval, AxisRepeatCallback, NULL);
+    }
+}
+
+static void
+StopAxisRepeat()
+{
+    if (axis_repeat_timer != 0) {
+        SDL_RemoveTimer(axis_repeat_timer);
+        axis_repeat_timer = 0;
+        axis_left = axis_right = axis_up = axis_down = false;  // Reset all axis states
+    }
+}
+
 static void
 SDL_LoadVIDPIDListFromHint(const char *hint, SDL_vidpid_list *list)
 {
@@ -269,6 +341,8 @@ static void ResetOutput(SDL_GameController *gamecontroller, SDL_ExtendedGameCont
 static void HandleJoystickAxis(SDL_GameController *gamecontroller, int axis, int value)
 {
     int i;
+    int threshold;
+
     SDL_ExtendedGameControllerBind *last_match;
     SDL_ExtendedGameControllerBind *match = NULL;
 
@@ -299,6 +373,8 @@ static void HandleJoystickAxis(SDL_GameController *gamecontroller, int axis, int
         /* Clear the last input that this axis generated */
         ResetOutput(gamecontroller, last_match);
     }
+  
+    threshold = match->input.axis.axis_min + (match->input.axis.axis_max - match->input.axis.axis_min) / 2;
 
     if (match) {
         if (match->outputType == SDL_CONTROLLER_BINDTYPE_AXIS) {
@@ -309,7 +385,6 @@ static void HandleJoystickAxis(SDL_GameController *gamecontroller, int axis, int
             SDL_PrivateGameControllerAxis(gamecontroller, match->output.axis.axis, (Sint16)value);
         } else {
             Uint8 state;
-            int threshold = match->input.axis.axis_min + (match->input.axis.axis_max - match->input.axis.axis_min) / 2;
             if (match->input.axis.axis_max < match->input.axis.axis_min) {
                 state = (value <= threshold) ? SDL_PRESSED : SDL_RELEASED;
             } else {
@@ -319,6 +394,45 @@ static void HandleJoystickAxis(SDL_GameController *gamecontroller, int axis, int
         }
     }
     gamecontroller->last_match_axis[axis] = match;
+  
+    if (mouseMode) {
+        bool start_repeat = false;
+        
+        if (axis == SDL_CONTROLLER_AXIS_LEFTX) {
+            if (value < -threshold) {
+                axis_left = true;
+                axis_right = false;
+                start_repeat = true;
+            } else if (value > threshold) {
+                axis_right = true;
+                axis_left = false;
+                start_repeat = true;
+            } else {
+                axis_left = axis_right = false;
+            }
+        } else if (axis == SDL_CONTROLLER_AXIS_LEFTY) {
+            if (value < -threshold) {
+                axis_up = true;
+                axis_down = false;
+                start_repeat = true;
+            } else if (value > threshold) {
+                axis_down = true;
+                axis_up = false;
+                start_repeat = true;
+            } else {
+                axis_up = axis_down = false;
+            }
+        }
+
+        if (start_repeat) {
+            StartAxisRepeat();
+        }
+
+        /* Stop repeat if all axis directions are released */
+        if (!axis_left && !axis_right && !axis_up && !axis_down) {
+            StopAxisRepeat();
+        }
+    }
 }
 
 static void HandleJoystickButton(SDL_GameController *gamecontroller, int button, Uint8 state)
@@ -2991,6 +3105,41 @@ SDL_PrivateGameControllerButton(SDL_GameController *gamecontroller, SDL_GameCont
         return (0);
     }
 #endif /* !SDL_EVENTS_DISABLED */
+  
+    event.type = (state == SDL_PRESSED) ? SDL_CONTROLLERBUTTONDOWN : SDL_CONTROLLERBUTTONUP;
+
+    if (mouseMode) {
+        bool start_repeat = false;
+        switch (button) {
+            case SDL_CONTROLLER_BUTTON_DPAD_UP:
+                dpad_up = (state == SDL_PRESSED);
+                start_repeat = true;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                dpad_down = (state == SDL_PRESSED);
+                start_repeat = true;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+                dpad_left = (state == SDL_PRESSED);
+                start_repeat = true;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+                dpad_right = (state == SDL_PRESSED);
+                start_repeat = true;
+                break;
+            default:
+                break;
+        }
+
+        if (start_repeat) {
+            StartDPadRepeat();
+        }
+
+        /* Stop repeat if all directions are released */
+        if (!dpad_up && !dpad_down && !dpad_left && !dpad_right) {
+            StopDPadRepeat();
+        }
+    }
 
     if (button == SDL_CONTROLLER_BUTTON_GUIDE) {
         Uint32 now = SDL_GetTicks();
