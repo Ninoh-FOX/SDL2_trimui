@@ -42,16 +42,32 @@
 
 #include <SDL.h>
 #include <stdbool.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdbool.h>
+#include <fcntl.h>
+#include <linux/fb.h>
+#include <sys/ioctl.h>
+#include <pthread.h>
 
 /* Constants for mouse mode */
 #define MOUSE_SPEED 10
 
 /* Global variable to track mouse mode */
 static bool mouseMode = false;
-static int mouse_x = 512;  // Coordenada X en la pantalla de 1024x768
-static int mouse_y = 384;  // Coordenada Y en la pantalla de 1024x768
+static int mouse_x = 0;
+static int mouse_y = 0;
 static int dx;
 static int dy;
+struct fb_fix_screeninfo finfo;
+struct fb_var_screeninfo vinfo;
+
+static int screen_width = 0;
+static int screen_height = 0;
+static int max_x;
+static int max_y;
+
+static bool cursor_mouse = false;
 
 /* Timers and active states */
 static SDL_TimerID dpad_repeat_timer = 0;
@@ -172,20 +188,46 @@ typedef struct
 static SDL_vidpid_list SDL_allowed_controllers;
 static SDL_vidpid_list SDL_ignored_controllers;
 
+
+/* Function to get screen resolution */
+static void
+getresolution(void)
+{
+	const char *fb_device = "/dev/fb0";
+    int fb = open(fb_device, O_RDWR);
+    if (fb == -1) {
+        return;
+    }
+    if (ioctl(fb, FBIOGET_VSCREENINFO, &vinfo)) {
+        close(fb);
+        return;
+    }
+   screen_width = vinfo.xres;
+   screen_height = vinfo.yres;
+   close(fb);
+}
+
 /* Function to move the mouse cursor */
 static void
 moveMouseCursor(int dx, int dy)
 {
-    /* Actualizar posición del ratón */
-    mouse_x = SDL_clamp(mouse_x + dx, 0, 1024);
-    mouse_y = SDL_clamp(mouse_y + dy, 0, 768);
+    if (!cursor_mouse) {
+      getresolution();
+      max_x = screen_width -1;
+      max_y = screen_height -1;
+      mouse_x = screen_width / 2;
+      mouse_y = screen_height / 2;
+      cursor_mouse = true;
+    }
+  
+    mouse_x = SDL_clamp(mouse_x + dx, 0, screen_width);
+    mouse_y = SDL_clamp(mouse_y + dy, 0, screen_height);
 
-    if (mouse_x < 0) mouse_x = SDL_clamp(0, 0, 1024);
-    if (mouse_x > 1023) mouse_x = SDL_clamp(1023, 0, 1024);
-    if (mouse_y < 0) mouse_y = SDL_clamp(0, 0, 768);
-    if (mouse_y > 767) mouse_y = SDL_clamp(767, 0, 768);
+    if (mouse_x < 0) mouse_x = SDL_clamp(0, 0, screen_width);
+    if (mouse_x > max_x) mouse_x = SDL_clamp(max_x, 0, screen_width);
+    if (mouse_y < 0) mouse_y = SDL_clamp(0, 0, screen_height);
+    if (mouse_y > max_y) mouse_y = SDL_clamp(767, 0, screen_height);
 
-    /* Reportar la nueva posición del ratón (modo framebuffer) */
     SDL_SendMouseMotion(NULL, 0, 0, mouse_x, mouse_y);
 }
 
@@ -341,7 +383,7 @@ static void ResetOutput(SDL_GameController *gamecontroller, SDL_ExtendedGameCont
 static void HandleJoystickAxis(SDL_GameController *gamecontroller, int axis, int value)
 {
     int i;
-    int threshold;
+    int neutral_threshold = 8000;
 
     SDL_ExtendedGameControllerBind *last_match;
     SDL_ExtendedGameControllerBind *match = NULL;
@@ -374,7 +416,6 @@ static void HandleJoystickAxis(SDL_GameController *gamecontroller, int axis, int
         ResetOutput(gamecontroller, last_match);
     }
   
-    threshold = match->input.axis.axis_min + (match->input.axis.axis_max - match->input.axis.axis_min) / 2;
 
     if (match) {
         if (match->outputType == SDL_CONTROLLER_BINDTYPE_AXIS) {
@@ -385,6 +426,7 @@ static void HandleJoystickAxis(SDL_GameController *gamecontroller, int axis, int
             SDL_PrivateGameControllerAxis(gamecontroller, match->output.axis.axis, (Sint16)value);
         } else {
             Uint8 state;
+            int threshold = match->input.axis.axis_min + (match->input.axis.axis_max - match->input.axis.axis_min) / 2;
             if (match->input.axis.axis_max < match->input.axis.axis_min) {
                 state = (value <= threshold) ? SDL_PRESSED : SDL_RELEASED;
             } else {
@@ -399,35 +441,37 @@ static void HandleJoystickAxis(SDL_GameController *gamecontroller, int axis, int
         bool start_repeat = false;
         
         if (axis == SDL_CONTROLLER_AXIS_LEFTX) {
-            if (value < -threshold) {
+            if (value < -neutral_threshold) {
                 axis_left = true;
                 axis_right = false;
                 start_repeat = true;
-            } else if (value > threshold) {
+            } else if (value > neutral_threshold) {
                 axis_right = true;
                 axis_left = false;
                 start_repeat = true;
             } else {
                 axis_left = axis_right = false;
-                start_repeat = false;
+				start_repeat = false;
             }
         } else if (axis == SDL_CONTROLLER_AXIS_LEFTY) {
-            if (value < -threshold) {
+            if (value < -neutral_threshold) {
                 axis_up = true;
                 axis_down = false;
                 start_repeat = true;
-            } else if (value > threshold) {
+            } else if (value > neutral_threshold) {
                 axis_down = true;
                 axis_up = false;
                 start_repeat = true;
             } else {
                 axis_up = axis_down = false;
-                start_repeat = false;
+				        start_repeat = false;
             }
         }
 
         if (start_repeat) {
-            StartAxisRepeat();
+            if (axis_left || axis_right || axis_up || axis_down) {
+                StartAxisRepeat();
+            }
         }
 
         /* Stop repeat if all axis directions are released */
