@@ -409,6 +409,7 @@ static void HandleJoystickAxis(SDL_GameController *gamecontroller, int axis, int
                 start_repeat = true;
             } else {
                 axis_left = axis_right = false;
+                start_repeat = false;
             }
         } else if (axis == SDL_CONTROLLER_AXIS_LEFTY) {
             if (value < -threshold) {
@@ -421,6 +422,7 @@ static void HandleJoystickAxis(SDL_GameController *gamecontroller, int axis, int
                 start_repeat = true;
             } else {
                 axis_up = axis_down = false;
+                start_repeat = false;
             }
         }
 
@@ -431,6 +433,7 @@ static void HandleJoystickAxis(SDL_GameController *gamecontroller, int axis, int
         /* Stop repeat if all axis directions are released */
         if (!axis_left && !axis_right && !axis_up && !axis_down) {
             StopAxisRepeat();
+            start_repeat = false;
         }
     }
 }
