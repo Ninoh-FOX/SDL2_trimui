@@ -226,7 +226,7 @@ moveMouseCursor(int dx, int dy)
     if (mouse_x < 0) mouse_x = SDL_clamp(0, 0, screen_width);
     if (mouse_x > max_x) mouse_x = SDL_clamp(max_x, 0, screen_width);
     if (mouse_y < 0) mouse_y = SDL_clamp(0, 0, screen_height);
-    if (mouse_y > max_y) mouse_y = SDL_clamp(767, 0, screen_height);
+    if (mouse_y > max_y) mouse_y = SDL_clamp(max_y, 0, screen_height);
 
     SDL_SendMouseMotion(NULL, 0, 0, mouse_x, mouse_y);
 }
